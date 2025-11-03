@@ -2,7 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 import sqlite3
 from datetime import datetime, date
-from config import token
+# from config import token
 import bot_simple_bd_func
 import time
 
