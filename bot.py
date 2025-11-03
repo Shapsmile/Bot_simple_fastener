@@ -10,7 +10,7 @@ import time
 # Если нет - можно использовать контекст для управления состоянием
 
 # Токен бота
-TOKEN = token
+TOKEN = "8300949534:AAE31UX-QcgouJ2iwluz5MYwXCe_t8rOnHw"
 
 # Добавим в начало файла (после TOKEN)
 ADMIN_PASSWORD = "1234"  # Временный пароль, потом можно вынести в config
