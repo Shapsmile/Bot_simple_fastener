@@ -9,7 +9,7 @@ import os
 
 # Состояния для диалога добавления материалов (если используете ConversationHandler)
 # Если нет - можно использовать контекст для управления состоянием
-
+# TOKEN = token
 # Читаем токен из переменных окружения
 TOKEN = os.environ.get('BOT_TOKEN')
 
@@ -64,7 +64,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = []
     for exc_id, name in excavations:
         # callback_data будет в формате "exc_1", "exc_2" и т.д.
-        keyboard.append([InlineKeyboardButton(name, callback_data=f"exc_{exc_id}")])
+        keyboard.append([InlineKeyboardButton("⚒️ " + name, callback_data=f"exc_{exc_id}")])
+
+    # ДОБАВЛЯЕМ КНОПКУ НАСТРОЕК
+    keyboard.append([InlineKeyboardButton("⚙️ Настройки", callback_data="global_settings")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -73,6 +76,64 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🏗️ Выберите забой для работы:",
         reply_markup=reply_markup
     )
+
+
+async def show_global_settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Глобальные настройки системы (доступны из главного меню)
+    """
+    user_id = update.effective_user.id
+    is_admin = bot_simple_bd_func.get_user_role(user_id) == 'admin'
+
+    # Кнопки доступные всем пользователям
+    keyboard = [[InlineKeyboardButton("👤 Мой профиль", callback_data="user_profile")]]
+
+    # Кнопки только для администраторов
+    if is_admin:
+        keyboard.append([InlineKeyboardButton("👨‍💼 Управление пользователями", callback_data="user_management")])
+        # Место для будущих настроек:
+        # keyboard.append([InlineKeyboardButton("📊 Настройки отчетов", callback_data="report_settings")])
+        # keyboard.append([InlineKeyboardButton("🔧 Системные настройки", callback_data="system_settings")])
+
+    keyboard.append([InlineKeyboardButton("◀️ Назад к выбору забоя", callback_data="back_to_excavations")])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    query = update.callback_query
+    await query.edit_message_text(
+        "⚙️ Настройки системы",
+        reply_markup=reply_markup
+    )
+
+
+async def show_user_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Показывает информацию о текущем пользователе
+    """
+    user_id = update.effective_user.id
+    user_info = bot_simple_bd_func.get_user_info(user_id)
+
+    if user_info:
+        user_id, username, full_name, role, added_date = user_info
+        role_icon = "👑" if role == 'admin' else "👤"
+
+        text = (
+            f"{role_icon} Ваш профиль\n\n"
+            f"📛 ФИО: {full_name or 'Не указано'}\n"
+        )
+        if username:
+            text += f"📱 Username: @{username}\n"
+        text += f"🎯 Роль: {role}\n"
+        text += f"🆔 ID: {user_id}\n"
+        text += f"📅 В системе с: {added_date}"
+    else:
+        text = "❌ Информация о пользователе не найдена"
+
+    keyboard = [[InlineKeyboardButton("◀️ Назад в настройки", callback_data="back_to_settings")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    query = update.callback_query
+    await query.edit_message_text(text, reply_markup=reply_markup)
 
 
 async def show_excavation_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, excavation_id: int):
@@ -87,17 +148,10 @@ async def show_excavation_menu(update: Update, context: ContextTypes.DEFAULT_TYP
     context.user_data['current_excavation_name'] = excavation_name
 
     # Базовые кнопки для всех пользователей
-    keyboard = [
-        [InlineKeyboardButton("📦 Склад", callback_data="menu_stock")],
-        [InlineKeyboardButton("📏 Проходка", callback_data="menu_advance")],
-        [InlineKeyboardButton("📄 Паспорт крепления", callback_data="menu_passport")],
-    ]
-
-    # Дополнительные кнопки только для администраторов
-    if is_admin:
-        keyboard.append([InlineKeyboardButton("👨‍💼 Управление пользователями", callback_data="user_management")])
-
-    keyboard.append([InlineKeyboardButton("◀️ Назад к выбору забоя", callback_data="back_to_excavations")])
+    keyboard = [[InlineKeyboardButton("📦 Склад", callback_data="menu_stock")],
+                [InlineKeyboardButton("📏 Проходка", callback_data="menu_advance")],
+                [InlineKeyboardButton("📄 Паспорт крепления", callback_data="menu_passport")],
+                [InlineKeyboardButton("◀️ Назад к выбору забоя", callback_data="back_to_excavations")]]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1517,8 +1571,8 @@ async def show_user_management(update: Update, context: ContextTypes.DEFAULT_TYP
     keyboard = [
         [InlineKeyboardButton("👥 Список пользователей", callback_data="users_list")],
         [InlineKeyboardButton("➕ Добавить пользователя", callback_data="users_add")],
-        [InlineKeyboardButton("🗑️ Удалить пользователя", callback_data="users_remove")],  # НОВАЯ КНОПКА
-        [InlineKeyboardButton("◀️ В главное меню", callback_data="back_to_excavation_menu")]
+        [InlineKeyboardButton("🗑️ Удалить пользователя", callback_data="users_remove")],
+        [InlineKeyboardButton("◀️ Назад в настройки", callback_data="back_to_settings")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1958,6 +2012,14 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
     elif data == "cancel_remove":
         await show_users_for_removal(update, context)
 
+    # Обработка глобальных настроек
+    elif data == "global_settings":
+        await show_global_settings(update, context)
+    elif data == "back_to_settings":
+        await show_global_settings(update, context)
+    elif data == "user_profile":
+        await show_user_profile(update, context)
+
 
 async def handle_all_text_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -2035,7 +2097,10 @@ async def start_from_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Создаем кнопки выбора
     keyboard = []
     for exc_id, name in excavations:
-        keyboard.append([InlineKeyboardButton(name, callback_data=f"exc_{exc_id}")])
+        keyboard.append([InlineKeyboardButton("⚒️ " + name, callback_data=f"exc_{exc_id}")])
+
+    # ДОБАВЛЯЕМ КНОПКУ НАСТРОЕК (как в функции start())
+    keyboard.append([InlineKeyboardButton("⚙️ Настройки", callback_data="global_settings")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -2127,7 +2192,7 @@ async def user_management_command(update: Update, context: ContextTypes.DEFAULT_
     if not await check_access(update, context):
         return
 
-    await show_user_management(update, context)
+    await show_global_settings(update, context)
 
 
 # ===== MIDDLEWARE ДЛЯ ПРОВЕРКИ ДОСТУПА =====
