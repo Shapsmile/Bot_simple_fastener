@@ -5,12 +5,16 @@ from datetime import datetime, date
 # from config import token
 import bot_simple_bd_func
 import time
+import os
 
 # Состояния для диалога добавления материалов (если используете ConversationHandler)
 # Если нет - можно использовать контекст для управления состоянием
 
-# Токен бота
-TOKEN = "8300949534:AAE31UX-QcgouJ2iwluz5MYwXCe_t8rOnHw"
+# Читаем токен из переменных окружения
+TOKEN = os.environ.get('BOT_TOKEN')
+
+if not TOKEN:
+    raise ValueError("BOT_TOKEN environment variable is not set")
 
 # Добавим в начало файла (после TOKEN)
 ADMIN_PASSWORD = "1234"  # Временный пароль, потом можно вынести в config
