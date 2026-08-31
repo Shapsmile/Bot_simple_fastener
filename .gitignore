@@ -1,5 +1,5 @@
 bot_simple_fastener_venv/
-config.py
+venv/
 .DS_Store
 .idea/
 # Кэш Python
