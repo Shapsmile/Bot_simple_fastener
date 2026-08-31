@@ -53,13 +53,20 @@ Telegram-бот для учёта проходки горных выработо
 - Python 3.9+
 - `python-telegram-bot` ~= 22.5
 
-## Развёртывание
+## Развёртывание на Railway
 
-Проект содержит конфигурацию для Railway (`railway.json`): сборка через Nixpacks, команда запуска `python bot.py`. Токен задаётся переменной окружения `BOT_TOKEN`.
+1. Запушьте код в GitHub-репозиторий (этот проект уже настроен под это).
+2. В панели Railway: **New Project → Deploy from GitHub repo** → выберите `Bot_simple_fastener`.
+3. Railway определит Python/Nixpacks автоматически (`railway.json` уже в репозитории).
+4. В **Variables** добавьте `BOT_TOKEN` — токен от @BotFather.
+5. Railway сам выполнит `pip install -r requirements.txt` и запустит `python bot.py`.
+
+> ⚠️ **Важно про БД**: проект использует SQLite (файл `fastener_v3.db`). На Railway файловая система эфемерная — при каждом редеплое база пересоздаётся с нуля (таблицы создаются автоматически при старте, но данные теряются). Для постоянного хранения нужен [Volume](https://docs.railway.com/reference/volumes) или PostgreSQL.
+
 ## Настройка
 
 - Первый администратор добавляется в `bot_simple_bd_func.py` (функция `user_system_database`, замените `user_id` на свой).
-- Пароль для редактирования паспорта задаётся в `bot.py` (переменная `ADMIN_PASSWORD`).
+- Пароль для редактирования паспорта задаётся в `bot_app/config.py` (переменная `ADMIN_PASSWORD`).
 
 ## Статус разработки
 

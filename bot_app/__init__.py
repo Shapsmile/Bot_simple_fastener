@@ -2,6 +2,7 @@
 
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, MessageHandler, filters
 
+import bot_simple_bd_func
 from bot_app.config import TOKEN
 from bot_app.router import handle_all_text_input, handle_button_click, handle_new_user_message
 from bot_app.screens import start
@@ -9,6 +10,10 @@ from bot_app.users import user_management_command
 
 
 def main():
+    # Инициализируем базу данных (на Railway файла нет - создаём схему при старте)
+    bot_simple_bd_func.init_database()
+    bot_simple_bd_func.user_system_database()
+
     application = Application.builder().token(TOKEN).build()
 
     # Обработчики команд
