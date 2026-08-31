@@ -116,39 +116,73 @@ def init_database():
     # КОММЕНТАРИЙ: Проходка тоже привязана к выработке
     # При списании материалов будем использовать нормы из паспорта этой выработки
 
-    # ЗАПОЛНЯЕМ ТЕСТОВЫЕ ДАННЫЕ
+    # ЗАПОЛНЯЕМ РЕАЛЬНЫЕ ДАННЫЕ (перенесены из локальной fastener_v3.db)
 
-    # 1. Заполняем справочник материалов (БЕЗ норм расхода!)
+    # 1. Удаляем старые демо-данные, если база была создана старым кодом
+    cursor.execute("DELETE FROM supply WHERE excavation_id IN (SELECT id FROM excavations WHERE name IN ('Северная', 'Южная'))")
+    cursor.execute("DELETE FROM advance WHERE excavation_id IN (SELECT id FROM excavations WHERE name IN ('Северная', 'Южная'))")
+    cursor.execute("DELETE FROM excavation_materials WHERE excavation_id IN (SELECT id FROM excavations WHERE name IN ('Северная', 'Южная'))")
+    cursor.execute("DELETE FROM excavations WHERE name IN ('Северная', 'Южная')")
+
+    cursor.execute("DELETE FROM supply WHERE material_id IN (SELECT id FROM materials WHERE name IN ('Анкер АС-2', 'Сетка ОСС', 'Штанга талевая'))")
+    cursor.execute("DELETE FROM excavation_materials WHERE material_id IN (SELECT id FROM materials WHERE name IN ('Анкер АС-2', 'Сетка ОСС', 'Штанга талевая'))")
+    cursor.execute("DELETE FROM materials WHERE name IN ('Анкер АС-2', 'Сетка ОСС', 'Штанга талевая')")
+
+    # 2. Справочник материалов (реальные данные)
     cursor.execute('''
         INSERT OR IGNORE INTO materials (id, name, unit) 
         VALUES 
-        (1, 'Анкер АС-2', 'шт'),      -- Анкеры в штуках
-        (2, 'Сетка ОСС', 'м²'),       -- Сетка в квадратных метрах  
-        (3, 'Штанга талевая', 'шт')   -- Штанги в штуках
+        (1, 'Анкер АВ-20-2900 мм', 'шт'),
+        (2, 'Анкер АС-18-2600 мм', 'шт'),
+        (3, 'Решетка 100х100 мм', 'шт'),
+        (4, 'Решетка 50х50 мм', 'шт'),
+        (5, 'Анкер АК-01-7000 мм', 'шт'),
+        (6, 'Ампула 1200 мм', 'шт'),
+        (7, 'Анкер АН20В 2600 мм', 'шт'),
+        (8, 'Анкер АН20В 1800 мм', 'шт'),
+        (9, 'Анкер стеклопласт 1800 мм', 'шт'),
+        (10, 'Шайба стеклопласт', 'шт'),
+        (11, 'Шайба 250х250', 'шт'),
+        (12, 'Шайба 100х100', 'шт')
     ''')
-    # КОММЕНТАРИЙ: Обратите внимание - нет поля consumption_per_meter!
-    # Нормы будут задаваться для каждой выработки отдельно
 
-    # 2. Заполняем справочник выработок
+    # 3. Справочник выработок
     cursor.execute('''
         INSERT OR IGNORE INTO excavations (id, name) 
         VALUES 
-        (1, 'Северная'),  -- Выработка №1
-        (2, 'Южная')      -- Выработка №2
+        (5, 'Вентиляционный бремсберг пл. 15'),
+        (7, 'Вентиляционный штрек 15-17')
     ''')
 
-    # 3. Заполняем паспорта крепления (нормы расхода для каждой выработки)
+    # 4. Паспорта крепления (нормы расхода для каждой выработки)
     cursor.execute('''
         INSERT OR IGNORE INTO excavation_materials (excavation_id, material_id, consumption_per_meter) 
         VALUES 
-        (1, 1, 10.0),   -- Северная выработка: Анкер 10 шт/метр
-        (1, 2, 1.2),    -- Северная выработка: Сетка 1.2 м²/метр
-        (2, 1, 15.0),   -- Южная выработка: Анкер 15 шт/метр (ДРУГАЯ НОРМА!)
-        (2, 3, 8.0)     -- Южная выработка: Штанга 8 шт/метр
+        (5, 3, 2.0),
+        (5, 7, 6.0),
+        (7, 3, 4.0),
+        (7, 6, 12.0),
+        (7, 7, 6.0),
+        (7, 8, 3.0),
+        (7, 9, 3.0),
+        (7, 10, 3.0),
+        (7, 11, 9.0),
+        (7, 12, 6.0)
     ''')
-    # КОММЕНТАРИЙ: Здесь видна разница в нормах!
-    # В Северной выработке анкер 10 шт/м, в Южной - 15 шт/м
-    # Также в Южной выработке используется штанга, которой нет в Северной
+
+    # 5. Остатки на складе (приходы на забой 7)
+    cursor.execute('''
+        INSERT OR IGNORE INTO supply (excavation_id, material_id, quantity)
+        VALUES 
+        (7, 3, 50.0),
+        (7, 6, 140.0),
+        (7, 7, 100.0),
+        (7, 8, 100.0),
+        (7, 9, 100.0),
+        (7, 10, 100.0),
+        (7, 11, 200.0),
+        (7, 12, 100.0)
+    ''')
 
     # Сохраняем изменения и закрываем соединение
     conn.commit()
@@ -179,7 +213,16 @@ def user_system_database():
     cursor.execute('''
         INSERT OR IGNORE INTO authorized_users (user_id, username, full_name, role) 
         VALUES (?, ?, ?, ?)
-    ''', ('440447786', 'Shapsmile', 'Аркадий Шапошников', 'Admin'))
+    ''', ('440447786', 'Shapsmile', 'Аркадий Шапошников', 'admin'))
+
+    # Добавляем оператора
+    cursor.execute('''
+        INSERT OR IGNORE INTO authorized_users (user_id, username, full_name, role) 
+        VALUES (?, ?, ?, ?)
+    ''', ('1034243680', 'Shaposhnikova_hello', 'Шапошникова Анастасия', 'operator'))
+
+    # Нормализуем роли: в старых базах админ мог быть записан как 'Admin'
+    cursor.execute("UPDATE authorized_users SET role = LOWER(role)")
 
     conn.commit()
     conn.close()
