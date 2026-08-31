@@ -2,3 +2,9 @@ bot_simple_fastener_venv/
 config.py
 .DS_Store
 .idea/
+# Кэш Python
+__pycache__/
+*.pyc
+
+# База данных (личные данные пользователей)
+*.db
