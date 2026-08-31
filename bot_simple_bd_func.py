@@ -1,9 +1,13 @@
+import os
 import sqlite3
 from datetime import datetime
 
 
-# Переменная базы данных
-database = 'fastener_v3.db'
+# Путь к данным.
+# На Railway задаётся переменная DATA_DIR, указывающая на Volume
+# (например, /app/data). Локально база создаётся в папке проекта.
+data_dir = os.environ.get('DATA_DIR', '')
+database = os.path.join(data_dir, 'fastener_v3.db') if data_dir else 'fastener_v3.db'
 
 
 # ===== ОБЩИЙ ХЕЛПЕР ДЛЯ РАБОТЫ С БД (DRY) =====
@@ -32,6 +36,10 @@ def init_database():
     Инициализация базы данных с новой архитектурой
     Ключевое изменение: нормы расхода теперь в паспорте выработки, а не в материалах
     """
+
+    # Если база лежит в DATA_DIR (Volume) - убеждаемся, что папка существует
+    if data_dir:
+        os.makedirs(data_dir, exist_ok=True)
 
     # Создаем соединение с базой данных.
     # Если файл database не существует - он будет создан автоматически
