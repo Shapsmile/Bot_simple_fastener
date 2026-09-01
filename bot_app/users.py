@@ -6,8 +6,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 import bot_simple_bd_func
+from bot_app.common import check_access, clear_input_state
 from bot_app.config import pending_users
-from bot_app.common import check_access
 from bot_app.screens import show_global_settings
 
 
@@ -68,6 +68,7 @@ async def ask_user_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Запрашивает данные нового пользователя
     """
+    clear_input_state(context)  # Сбрасываем любые предыдущие состояния ввода
     keyboard = [[InlineKeyboardButton("❌ Отменить", callback_data="back_to_user_management")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -161,6 +162,10 @@ async def process_new_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     InlineKeyboardButton("❌ Отменить", callback_data="back_to_user_management")
                 ]])
             )
+
+    finally:
+        # Всегда очищаем ключ, чтобы он не перехватывал последующий ввод
+        context.user_data.pop('user_add_message_id', None)
 
 
 async def show_users_for_removal(update: Update, context: ContextTypes.DEFAULT_TYPE):

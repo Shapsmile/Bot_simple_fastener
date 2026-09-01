@@ -4,6 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 import bot_simple_bd_func
+from bot_app.common import clear_input_state
 from bot_app.screens import show_global_settings
 
 
@@ -20,6 +21,8 @@ async def show_material_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if bot_simple_bd_func.get_user_role(user_id) != 'admin':
         await query.answer("🚫 Недостаточно прав!", show_alert=True)
         return
+
+    clear_input_state(context)  # Сбрасываем любые предыдущие состояния ввода
 
     keyboard = [[InlineKeyboardButton("❌ Отменить", callback_data="back_to_settings")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -161,6 +164,7 @@ async def ask_passport_consumption(update: Update, context: ContextTypes.DEFAULT
     """
     Запрашивает норму расхода для добавляемого в паспорт материала
     """
+    clear_input_state(context)  # Сбрасываем любые предыдущие состояния ввода
     material_info = bot_simple_bd_func.get_material_info(material_id)
     if not material_info:
         await update.callback_query.answer("❌ Материал не найден!", show_alert=True)

@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 import bot_simple_bd_func
-from bot_app.common import show_input_error
+from bot_app.common import clear_input_state, show_input_error
 from bot_app.keyboards import stock_menu_keyboard
 
 
@@ -66,6 +66,7 @@ async def ask_quantity(update: Update, context: ContextTypes.DEFAULT_TYPE, mater
     Запрашивает количество для выбранного материала.
     Сохраняет message_id для последующего редактирования
     """
+    clear_input_state(context)  # Сбрасываем любые предыдущие состояния ввода
     # Получаем информацию о материале
     material_name, unit = bot_simple_bd_func.get_material_info(material_id)
 

@@ -8,6 +8,21 @@ import bot_simple_bd_func
 from bot_app.config import pending_users
 
 
+# Все ключи состояния ввода, которые должны очищаться при начале новой операции
+# и при отмене, чтобы не перехватывать последующий текстовый ввод
+INPUT_STATE_KEYS = [
+    'user_add_message_id',
+    'password_message_id',
+    'consumption_edit_message_id',
+    'date_input_message_id',
+    'meters_input_message_id',
+    'quantity_message_id',
+    'passport_consumption_message_id',
+    'excavation_add_message_id',
+    'material_add_message_id',
+]
+
+
 async def show_input_error(update, context, message_id_key, error_text, cancel_label, cancel_callback):
     """Удаляет сообщение пользователя и показывает ошибку в сообщении бота"""
     await update.message.delete()
@@ -36,6 +51,17 @@ def cleanup_pending_users():
 
     if expired:
         print(f"🧹 Очищены устаревшие ожидаемые пользователи: {expired}")
+
+
+def clear_input_state(context):
+    """
+    Полностью сбрасывает состояние текстового ввода.
+    Вызывается в начале каждой операции и при отмене,
+    чтобы в контексте не оставалось застрявших ключей,
+    которые перехватывают последующий ввод
+    """
+    for key in INPUT_STATE_KEYS:
+        context.user_data.pop(key, None)
 
 
 async def check_access(update, context):

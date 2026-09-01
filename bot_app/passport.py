@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 import bot_simple_bd_func
-from bot_app.common import show_input_error
+from bot_app.common import clear_input_state, show_input_error
 from bot_app.config import ADMIN_PASSWORD
 from bot_app.keyboards import passport_edit_keyboard
 
@@ -72,6 +72,7 @@ async def ask_password_for_edit(update: Update, context: ContextTypes.DEFAULT_TY
     """
     Запрашивает пароль для редактирования паспорта
     """
+    clear_input_state(context)  # Сбрасываем любые предыдущие состояния ввода
     excavation_name = context.user_data['current_excavation_name']
 
     # Создаем клавиатуру с кнопкой отмены
@@ -187,6 +188,7 @@ async def ask_new_consumption(update: Update, context: ContextTypes.DEFAULT_TYPE
     """
     Запрашивает новую норму расхода для материала
     """
+    clear_input_state(context)  # Сбрасываем любые предыдущие состояния ввода
     # Получаем информацию о материале
     material_name, unit = bot_simple_bd_func.get_material_info(material_id)
 

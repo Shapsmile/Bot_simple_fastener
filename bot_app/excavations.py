@@ -4,6 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 import bot_simple_bd_func
+from bot_app.common import clear_input_state
 from bot_app.screens import show_global_settings
 
 
@@ -18,6 +19,8 @@ async def show_excavation_add(update: Update, context: ContextTypes.DEFAULT_TYPE
     if bot_simple_bd_func.get_user_role(user_id) != 'admin':
         await query.answer("🚫 Недостаточно прав!", show_alert=True)
         return
+
+    clear_input_state(context)  # Сбрасываем любые предыдущие состояния ввода
 
     keyboard = [[InlineKeyboardButton("❌ Отменить", callback_data="back_to_settings")]]
     reply_markup = InlineKeyboardMarkup(keyboard)

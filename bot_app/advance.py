@@ -6,7 +6,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 import bot_simple_bd_func
-from bot_app.common import show_input_error
+from bot_app.common import clear_input_state, show_input_error
 from bot_app.config import shift_names, shift_names_with_clock
 from bot_app.keyboards import advance_menu_keyboard
 
@@ -70,6 +70,7 @@ async def ask_custom_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Запрашивает произвольную дату у пользователя
     """
+    clear_input_state(context)  # Сбрасываем любые предыдущие состояния ввода
     excavation_name = context.user_data['current_excavation_name']
 
     # Создаем клавиатуру с кнопкой отмены
@@ -236,6 +237,7 @@ async def ask_meters_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Запрашивает количество пройденных метров
     """
+    clear_input_state(context)  # Сбрасываем любые предыдущие состояния ввода
     excavation_name = context.user_data['current_excavation_name']
     work_date = context.user_data['advance_work_date']
     shift_number = context.user_data['advance_shift_number']
@@ -266,6 +268,7 @@ async def ask_additional_meters(update: Update, context: ContextTypes.DEFAULT_TY
     """
     Запрашивает дополнительные метры для добавления к существующим
     """
+    clear_input_state(context)  # Сбрасываем любые предыдущие состояния ввода
     excavation_name = context.user_data['current_excavation_name']
     work_date = context.user_data['advance_work_date']
     shift_number = context.user_data['advance_shift_number']

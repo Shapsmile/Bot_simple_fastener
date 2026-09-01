@@ -17,7 +17,7 @@ from bot_app.advance import (
     show_replace_warning,
     show_shift_selection,
 )
-from bot_app.common import check_access
+from bot_app.common import check_access, clear_input_state
 from bot_app.config import pending_users
 from bot_app.excavations import (
     process_excavation_name,
@@ -99,16 +99,20 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Обработка навигации "Назад"
     elif data == "back_to_excavation_menu":
         # Возврат в главное меню выработки
+        clear_input_state(context)  # Сбрасываем любые состояния ввода
         excavation_id = context.user_data['current_excavation_id']
         await show_excavation_menu(update, context, excavation_id)
     elif data == "back_to_excavations":
         # Возврат к выбору выработки
+        clear_input_state(context)  # Сбрасываем любые состояния ввода
         await start_from_button(update, context)
     elif data == "back_to_stock_menu":
         # Возврат в меню склада
+        clear_input_state(context)  # Сбрасываем любые состояния ввода
         await show_stock_menu(update, context)
     elif data == "back_to_advance_menu":
         # Возврат в меню проходки
+        clear_input_state(context)  # Сбрасываем любые состояния ввода
         await show_advance_menu(update, context)
 
     # Обработка функций склада
@@ -124,6 +128,7 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     # Обработка отмены добавления материала
     elif data == "cancel_add_material":
+        clear_input_state(context)  # Сбрасываем любые состояния ввода
         await cancel_add_material(update, context)
 
     # Обработка учета проходки
@@ -140,10 +145,13 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     # Обработка навигации в учете проходки
     elif data == "back_to_date_selection":
+        clear_input_state(context)  # Сбрасываем состояния ввода
         await show_date_selection(update, context)
     elif data == "cancel_date_input":
+        clear_input_state(context)  # Сбрасываем состояния ввода
         await show_date_selection(update, context)
     elif data == "cancel_meters_input":
+        clear_input_state(context)  # Сбрасываем состояния ввода
         await show_shift_selection(update, context)
 
     # Обработка истории проходки
@@ -214,20 +222,22 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
         material_id = int(data.replace("edit_mat_", ""))
         await ask_new_consumption(update, context, material_id)
     elif data == "cancel_edit_consumption":
-        # Очищаем флаг авторизации и временные данные при отмене
+        # Сохраняем ID сообщения для редактирования "одно окно"
+        consumption_message_id = context.user_data.pop('consumption_edit_message_id', None)
+        # Сбрасываем любые состояния ввода и флаги редактирования
+        clear_input_state(context)
         context.user_data.pop('passport_edit_authorized', None)
         context.user_data.pop('editing_material_id', None)
         context.user_data.pop('editing_material_name', None)
         context.user_data.pop('editing_material_unit', None)
         context.user_data.pop('current_consumption', None)
-        # Редактируем текущее сообщение, а не отправляем новое (одно окно)
-        consumption_message_id = context.user_data.pop('consumption_edit_message_id', None)
         await show_passport_edit(update, context, message_id=consumption_message_id)
 
     # Обработка навигации в паспорте
     elif data == "back_to_passport_menu":
         # Очищаем флаг авторизации при возврате
         context.user_data.pop('passport_edit_authorized', None)
+        clear_input_state(context)  # Сбрасываем любые состояния ввода
         await show_passport_menu(update, context)
 
     # Обработка управления пользователями
@@ -240,6 +250,7 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
     elif data == "users_remove":
         await show_users_for_removal(update, context)
     elif data == "back_to_user_management":
+        clear_input_state(context)  # Сбрасываем любые состояния ввода
         await show_user_management(update, context)
 
     # Обработка удаления пользователей
@@ -255,6 +266,7 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
     elif data == "global_settings":
         await show_global_settings(update, context)
     elif data == "back_to_settings":
+        clear_input_state(context)  # Сбрасываем любые состояния ввода
         await show_global_settings(update, context)
     elif data == "user_profile":
         await show_user_profile(update, context)
@@ -360,9 +372,10 @@ async def handle_all_text_input(update: Update, context: ContextTypes.DEFAULT_TY
         )
 
 
-async def handle_new_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    Обрабатывает сообщения от потенциально новых пользователей
+    Обрабатывает все текстовые сообщения: проверяет доступ,
+    авторизацию и направляет в соответствующий обработчик
     """
     user_id = update.effective_user.id
     username = update.effective_user.username
