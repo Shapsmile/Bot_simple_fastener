@@ -109,12 +109,27 @@ def init_database():
             id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Уникальный ID операции проходки
             excavation_id INTEGER NOT NULL,        -- ID выработки, где была проходка
             meters REAL NOT NULL,                  -- Количество пройденных метров
-            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Дата и время операции
+            shift_number INTEGER NOT NULL DEFAULT 1, -- Номер смены (1, 2, 3)
+            work_date DATE NOT NULL,               -- Дата выполнения работ
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Дата и время операции
             FOREIGN KEY (excavation_id) REFERENCES excavations (id)
         )
     ''')
-    # КОММЕНТАРИЙ: Проходка тоже привязана к выработке
-    # При списании материалов будем использовать нормы из паспорта этой выработки
+
+    # МИГРАЦИЯ: старые базы могли быть созданы без колонок shift_number и work_date.
+    # CREATE TABLE IF NOT EXISTS не меняет существующую таблицу, поэтому добавляем
+    # недостающие колонки вручную, если их нет.
+    try:
+        cursor.execute("PRAGMA table_info(advance)")
+        advance_cols = {row[1] for row in cursor.fetchall()}
+        if 'shift_number' not in advance_cols:
+            cursor.execute("ALTER TABLE advance ADD COLUMN shift_number INTEGER NOT NULL DEFAULT 1")
+            print("   - Добавлена колонка shift_number в таблицу advance")
+        if 'work_date' not in advance_cols:
+            cursor.execute("ALTER TABLE advance ADD COLUMN work_date DATE")
+            print("   - Добавлена колонка work_date в таблицу advance")
+    except Exception as e:
+        print(f"⚠️ Не удалось проверить/дополнить таблицу advance: {e}")
 
     # ЗАПОЛНЯЕМ РЕАЛЬНЫЕ ДАННЫЕ (перенесены из локальной fastener_v3.db)
 

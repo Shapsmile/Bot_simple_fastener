@@ -11,7 +11,7 @@ from bot_app.screens import start
 from bot_app.users import user_management_command
 
 
-def error_handler(update, context):
+async def error_handler(update, context):
     """Логирует ошибки, чтобы они не терялись молча"""
     logging.error(
         "Ошибка при обработке %s: %s",
