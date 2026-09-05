@@ -43,6 +43,13 @@ from bot_app.passport import (
     show_passport_menu,
     show_passport_view,
 )
+from bot_app.reports import (
+    ask_custom_period,
+    handle_report_period,
+    process_custom_period_input,
+    show_report_details,
+    show_report_menu,
+)
 from bot_app.screens import (
     show_advance_menu,
     show_excavation_menu,
@@ -120,6 +127,22 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
         await show_stock_view(update, context)
     elif data == "stock_add":
         await show_stock_add(update, context)
+
+    # Обработка отчетов о поступлениях
+    elif data == "report_menu":
+        await show_report_menu(update, context)
+    elif data.startswith("report_period_"):
+        if data == "report_period_custom":
+            await ask_custom_period(update, context)
+        else:
+            await handle_report_period(update, context)
+    elif data == "cancel_report_period":
+        clear_input_state(context)  # Сбрасываем любые состояния ввода
+        await show_report_menu(update, context)
+    elif data == "report_details":
+        await show_report_details(update, context)
+    elif data == "report_period_menu":
+        await show_report_menu(update, context)
 
     # Обработка выбора материала для добавления
     elif data.startswith("add_mat_"):
@@ -332,6 +355,11 @@ async def handle_all_text_input(update: Update, context: ContextTypes.DEFAULT_TY
     elif 'quantity_message_id' in context.user_data:
         print("🎯 Направляем в обработку количества материала")
         await process_quantity_input(update, context)
+
+    # 6.4 Если пользователь вводит период для отчета
+    elif 'report_period_message_id' in context.user_data:
+        print("🎯 Направляем в обработку периода отчета")
+        await process_custom_period_input(update, context)
 
     # 6.3 Если пользователь вводит норму расхода для добавления в паспорт
     # (проверяем ДО создания забоя/материала, чтобы активный ввод паспорта

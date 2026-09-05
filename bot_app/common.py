@@ -20,8 +20,8 @@ INPUT_STATE_KEYS = [
     'passport_consumption_message_id',
     'excavation_add_message_id',
     'material_add_message_id',
+    'report_period_message_id',
 ]
-
 
 async def show_input_error(update, context, message_id_key, error_text, cancel_label, cancel_callback):
     """Удаляет сообщение пользователя и показывает ошибку в сообщении бота"""

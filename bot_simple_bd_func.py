@@ -450,6 +450,55 @@ def add_material_to_stock(excavation_id, material_id, quantity):
         )
 
 
+def get_supply_report(excavation_id, start_date, end_date):
+    """
+    Отчет о поступлении материалов за период (сводка по материалам).
+    start_date/end_date - строки 'YYYY-MM-DD' (включительно).
+    Возвращает список словарей: name, unit, operations, total
+    """
+    with DatabaseConnection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT m.name, m.unit, COUNT(s.id), SUM(s.quantity)
+            FROM supply s
+            JOIN materials m ON s.material_id = m.id
+            WHERE s.excavation_id = ?
+              AND date(s.date) >= date(?)
+              AND date(s.date) <= date(?)
+            GROUP BY m.id
+            ORDER BY m.name
+        ''', (excavation_id, start_date, end_date))
+
+        report = []
+        for name, unit, operations, total in cursor.fetchall():
+            report.append({
+                'name': name,
+                'unit': unit,
+                'operations': operations,
+                'total': total or 0
+            })
+        return report
+
+
+def get_supply_operations(excavation_id, start_date, end_date):
+    """
+    Детализация поступлений материалов по датам за период.
+    Возвращает список кортежей: (date, quantity, name, unit)
+    """
+    with DatabaseConnection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT date(s.date), s.quantity, m.name, m.unit
+            FROM supply s
+            JOIN materials m ON s.material_id = m.id
+            WHERE s.excavation_id = ?
+              AND date(s.date) >= date(?)
+              AND date(s.date) <= date(?)
+            ORDER BY s.date DESC, m.name
+        ''', (excavation_id, start_date, end_date))
+        return cursor.fetchall()
+
+
 def add_advance_to_db(excavation_id, meters, shift_number, work_date, replace_existing=False):
     """
     Добавляет или обновляет запись о проходке в базе данных

@@ -19,6 +19,7 @@ def stock_menu_keyboard():
     """Клавиатура меню склада"""
     return [
         [InlineKeyboardButton("📊 Просмотр остатков", callback_data="stock_view")],
+        [InlineKeyboardButton("📈 Отчет по поступлениям", callback_data="report_menu")],
         [InlineKeyboardButton("➕ Пополнение материалов", callback_data="stock_add")],
         [InlineKeyboardButton("◀️ Назад в главное меню", callback_data="back_to_excavation_menu")]
     ]
