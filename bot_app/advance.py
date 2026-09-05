@@ -6,7 +6,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 import bot_simple_bd_func
-from bot_app.common import clear_input_state, show_input_error
+from bot_app.common import clear_input_state, fmt_qty, show_input_error
 from bot_app.config import shift_names, shift_names_with_clock
 from bot_app.keyboards import advance_menu_keyboard
 
@@ -370,7 +370,7 @@ async def process_meters_input(update: Update, context: ContextTypes.DEFAULT_TYP
             if final_meters > 0:
                 success_text += f"📋 Списано материалов:\n"
                 for item in consumption_data:
-                    success_text += f"• {item['name']}: {item['consumed']:.1f} {item['unit']}\n"
+                    success_text += f"• {item['name']}: {fmt_qty(item['consumed'])} {item['unit']}\n"
             else:
                 success_text += f"📋 Списание материалов: нет\n"
 

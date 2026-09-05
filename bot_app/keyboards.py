@@ -3,6 +3,7 @@
 from telegram import InlineKeyboardButton
 
 import bot_simple_bd_func
+from bot_app.common import fmt_qty
 
 
 def excavation_selection_keyboard():
@@ -38,7 +39,7 @@ def passport_edit_keyboard(passport_data):
     """Клавиатура выбора материала для редактирования паспорта"""
     keyboard = []
     for item in passport_data:
-        button_text = f"{item['name']}: {item['consumption_per_meter']} {item['unit']}/м"
+        button_text = f"{item['name']}: {fmt_qty(item['consumption_per_meter'])} {item['unit']}/м"
         keyboard.append([InlineKeyboardButton(button_text, callback_data=f"edit_mat_{item['material_id']}")])
     keyboard.append([InlineKeyboardButton("◀️ Назад в меню паспорта", callback_data="back_to_passport_menu")])
     return keyboard

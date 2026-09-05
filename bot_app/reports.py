@@ -6,7 +6,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 import bot_simple_bd_func
-from bot_app.common import clear_input_state, show_input_error
+from bot_app.common import clear_input_state, fmt_qty, show_input_error
 
 
 async def show_report_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -155,7 +155,7 @@ async def show_supply_report(update: Update, context: ContextTypes.DEFAULT_TYPE,
         text += f"\n📦 По материалам:\n"
         for item in report_data:
             text += (
-                f"• {item['name']}: {item['total']:.1f} {item['unit']} "
+                f"• {item['name']}: {fmt_qty(item['total'])} {item['unit']} "
                 f"(операций: {item['operations']})\n"
             )
     else:
@@ -195,7 +195,7 @@ async def show_supply_report_from_message(update: Update, context: ContextTypes.
         text += f"\n📦 По материалам:\n"
         for item in report_data:
             text += (
-                f"• {item['name']}: {item['total']:.1f} {item['unit']} "
+                f"• {item['name']}: {fmt_qty(item['total'])} {item['unit']} "
                 f"(операций: {item['operations']})\n"
             )
     else:
@@ -241,7 +241,7 @@ async def show_report_details(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if operations:
         for op_date, quantity, name, unit in operations:
-            text += f"• {op_date}: {quantity:.1f} {unit} — {name}\n"
+            text += f"• {op_date}: {fmt_qty(quantity)} {unit} — {name}\n"
     else:
         text += "📭 За выбранный период поступлений не было"
 

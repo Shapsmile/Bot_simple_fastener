@@ -23,6 +23,13 @@ INPUT_STATE_KEYS = [
     'report_period_message_id',
 ]
 
+def fmt_qty(value):
+    """Форматирует количество: целые числа без десятичной части, дробные — с ней."""
+    if float(value).is_integer():
+        return str(int(value))
+    return f"{value:.1f}"
+
+
 async def show_input_error(update, context, message_id_key, error_text, cancel_label, cancel_callback):
     """Удаляет сообщение пользователя и показывает ошибку в сообщении бота"""
     await update.message.delete()

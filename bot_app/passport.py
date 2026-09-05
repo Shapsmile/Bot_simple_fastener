@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 import bot_simple_bd_func
-from bot_app.common import clear_input_state, show_input_error
+from bot_app.common import clear_input_state, fmt_qty, show_input_error
 from bot_app.config import ADMIN_PASSWORD
 from bot_app.keyboards import passport_edit_keyboard
 
@@ -56,7 +56,7 @@ async def show_passport_view(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
 
         for item in passport_data:
-            text += f"• {item['name']}: {item['consumption_per_meter']} {item['unit']}\n"
+            text += f"• {item['name']}: {fmt_qty(item['consumption_per_meter'])} {item['unit']}\n"
 
         text += f"\n📋 Всего материалов: {len(passport_data)}"
 

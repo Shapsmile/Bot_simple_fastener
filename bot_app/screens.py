@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 import bot_simple_bd_func
-from bot_app.common import check_access
+from bot_app.common import check_access, fmt_qty
 from bot_app.keyboards import advance_menu_keyboard, excavation_selection_keyboard, stock_menu_keyboard
 
 
@@ -187,7 +187,7 @@ async def show_stock_view(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = f"🏗️ {excavation_name}\n📊 Текущие остатки материалов в забое:\n\n"
         for item in stock_data:
             # Форматируем вывод: "Анкер АС-2: 150.5 шт."
-            text += f"• {item['name']}: {item['quantity']:.1f} {item['unit']}\n"
+            text += f"• {item['name']}: {fmt_qty(item['quantity'])} {item['unit']}\n"
 
         text += f"\n📋 Всего позиций: {len(stock_data)}"
 
